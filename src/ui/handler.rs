@@ -9,6 +9,7 @@ use crossterm::{
 use std::io::{self, Stdout, Write};
 use textwrap::wrap;
 
+#[derive(Clone, Copy)]
 pub enum Page {
     Store,
     About,

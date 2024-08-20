@@ -40,28 +40,35 @@ fn main() -> crossterm::Result<()> {
     ui_state.show_page(&mut stdout,scroll_offset)?;
     
     
+    let pages = vec![Page::Store, Page::About, Page::FAQ];
+    let mut current_page_index = pages.len();
+    
     loop {
         if event::poll(std::time::Duration::from_millis(500))? {
             match event::read()? {
-                Event::Key(KeyEvent { code, modifiers }) =>{
+                Event::Key(KeyEvent { code, modifiers }) => {
                     match (code, modifiers) {
-                        (KeyCode::Char('a'), KeyModifiers::NONE) => {
+                        (KeyCode::Left, KeyModifiers::NONE) => {
+                            if current_page_index > 0 {
+                                current_page_index -= 1;
+                            } else {
+                                current_page_index = pages.len() - 1; // to the last page
+                            }
                             scroll_offset = 0;
-                            ui_state.current_page = Page::Store;
+                            ui_state.current_page = pages[current_page_index].clone();
                             ui_state.header_height = draw_header(&mut stdout, ui_state.start_x, ui_state.start_y, &ui_state.current_page)?;
-                            ui_state.show_page(&mut stdout, scroll_offset)?
+                            ui_state.show_page(&mut stdout, scroll_offset)?;
                         }
-                        (KeyCode::Char('s'), KeyModifiers::NONE) => {
+                        (KeyCode::Right, KeyModifiers::NONE) => {
+                            if current_page_index < pages.len() - 1 {
+                                current_page_index += 1;
+                            } else {
+                                current_page_index = 0; // to the first page
+                            }
                             scroll_offset = 0;
-                            ui_state.current_page = Page::About;
+                            ui_state.current_page = pages[current_page_index].clone();
                             ui_state.header_height = draw_header(&mut stdout, ui_state.start_x, ui_state.start_y, &ui_state.current_page)?;
-                            ui_state.show_page(&mut stdout, scroll_offset)?
-                        }
-                        (KeyCode::Char('d'), KeyModifiers::NONE) => {
-                            scroll_offset = 0;
-                            ui_state.current_page = Page::FAQ;
-                            ui_state.header_height = draw_header(&mut stdout, ui_state.start_x, ui_state.start_y, &ui_state.current_page)?;
-                            ui_state.show_page(&mut stdout, scroll_offset)?
+                            ui_state.show_page(&mut stdout, scroll_offset)?;
                         }
                         (KeyCode::Up, KeyModifiers::NONE) => {
                             if scroll_offset > 0 {
@@ -71,7 +78,6 @@ fn main() -> crossterm::Result<()> {
                             }
                         }
                         (KeyCode::Down, KeyModifiers::NONE) => {
-                            // Calculate maximum scroll based on content and terminal size
                             let max_scroll = calculate_max_scroll(&ui_state, rows);
                             if scroll_offset < max_scroll {
                                 scroll_offset += 1;
@@ -79,11 +85,7 @@ fn main() -> crossterm::Result<()> {
                                 ui_state.show_page(&mut stdout, scroll_offset)?;
                             }
                         }
-                        //TODO: Don't listen while on loading state to not auto close after load is complete
-                        //Break if Control + C, or q
-                        (KeyCode::Char('c'), KeyModifiers::CONTROL) => break,
-                        
-                        (KeyCode::Char('q'), KeyModifiers::NONE) => break,
+                        (KeyCode::Char('c'), KeyModifiers::CONTROL) | (KeyCode::Char('q'), KeyModifiers::NONE) => break,
                         _ => {}
                     }
                     draw_footer(&mut stdout, ui_state.start_x, rows, ui_state.width)?;
