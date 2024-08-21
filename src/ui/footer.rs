@@ -19,7 +19,7 @@ pub fn draw_footer(stdout: &mut io::Stdout, start_x: u16, rows: u16, container_w
     )?;
 
     // Centered footer options
-    let footer_text = "+/- qty   c cart   q quit";
+    let footer_text = "<-/-> navigation   +/- qty   c cart   q quit";
     let text_width = footer_text.len() as u16;
     let start_x_centered = start_x + (container_width.saturating_sub(text_width)) / 2;
 

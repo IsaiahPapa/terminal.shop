@@ -19,7 +19,7 @@ impl UIState {
     pub fn show_landing(&self, stdout: &mut io::Stdout) -> crossterm::Result<()> {
         execute!(stdout, cursor::MoveTo(0, self.start_y + self.header_height), Clear(ClearType::FromCursorDown))?;
 
-        let landing_text = "Welcome to the shop!\n\nNavigate using [a,s, and d] keys!\n";
+        let landing_text = "Welcome to the shop!\n\nNavigate using [<-, ->] keys!\n";
         let centered_lines = self.center_multiline_text(landing_text, self.width);
 
         // Calculate the starting y position to center the text vertically

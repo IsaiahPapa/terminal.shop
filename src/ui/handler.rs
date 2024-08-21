@@ -1,4 +1,4 @@
-use crate::products::Product;
+use crate::products::{get_products, Product};
 use crossterm::{
     cursor,
     execute,
@@ -9,6 +9,7 @@ use crossterm::{
 use std::io::{self, Stdout, Write};
 use textwrap::wrap;
 
+#[derive(Clone, Copy)]
 pub enum Page {
     Store,
     About,
@@ -30,11 +31,12 @@ pub struct UIState {
 }
 
 impl UIState {
-    pub fn new(products: Vec<Product>, term_width: u16, term_height: u16) -> Self {
+    pub fn new(term_width: u16, term_height: u16) -> Self {
         let width = 60;
         let height = 45;
         let start_x = (term_width.saturating_sub(width)) / 2;
         let start_y = (term_height.saturating_sub(height)) / 2;
+        let products = get_products();
 
         UIState {
             header_height: 0,
@@ -79,7 +81,7 @@ impl UIState {
     
     pub fn show_page(&self, stdout: &mut io::Stdout, scroll_offset: u16) -> crossterm::Result<()> {
         match self.current_page {
-            Page::Store => self.show_store(stdout),
+            Page::Store => self.show_store(stdout, scroll_offset),
             Page::About => self.show_about(stdout),
             Page::Landing => self.show_landing(stdout),
             Page::FAQ => self.show_faq(stdout, scroll_offset),

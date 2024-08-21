@@ -34,9 +34,9 @@ pub fn draw_header(stdout: &mut io::Stdout, start_x: u16, start_y: u16, current_
     execute!(stdout, cursor::MoveTo(start_x, start_y), SetForegroundColor(Color::DarkGrey))?;
 
     let logo = nav_item("terminal", true);
-    let shop = nav_item("a shop", matches!(current_page, Page::Store));
-    let about = nav_item("s about", matches!(current_page, Page::About));
-    let faq = nav_item("d faq", matches!(current_page, Page::FAQ)); // Assuming there's a FAQ page
+    let shop = nav_item("shop", matches!(current_page, Page::Store));
+    let about = nav_item("about", matches!(current_page, Page::About));
+    let faq = nav_item("faq", matches!(current_page, Page::FAQ)); // Assuming there's a FAQ page
     let cart = cart(0.0, 0); // Update with actual cart data if available
 
     let components = vec![logo, shop, about, faq, cart];
