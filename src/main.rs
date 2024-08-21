@@ -2,7 +2,7 @@ mod products;
 mod ui;
 
 use crossterm::event::Event;
-use products::get_products;
+use products::{get_products, get_products_lines};
 use textwrap::wrap;
 use ui::header::draw_header;
 use ui::footer::draw_footer;
@@ -33,7 +33,7 @@ fn main() -> crossterm::Result<()> {
     execute!(stdout, terminal::Clear(ClearType::All), crossterm::cursor::Hide)?;
 
     let products: Vec<products::Product> = get_products();
-    let mut ui_state: UIState = UIState::new(products, cols, rows);
+    let mut ui_state: UIState = UIState::new( cols, rows);
 
     ui_state.header_height = draw_header(&mut stdout, ui_state.start_x, ui_state.start_y, &ui_state.current_page)?;
     draw_footer(&mut stdout, ui_state.start_x, rows, ui_state.width)?;
@@ -41,6 +41,9 @@ fn main() -> crossterm::Result<()> {
     
     
     let pages = vec![Page::Store, Page::About, Page::FAQ];
+    let index_store: usize = 0;
+    let index_about: usize = 1;
+    let index_faq: usize = 2;
     let mut current_page_index = pages.len();
     
     loop {
@@ -78,7 +81,7 @@ fn main() -> crossterm::Result<()> {
                             }
                         }
                         (KeyCode::Down, KeyModifiers::NONE) => {
-                            let max_scroll = calculate_max_scroll(&ui_state, rows);
+                            let max_scroll = if current_page_index == index_store {calculate_store_max_scroll(&ui_state, rows)} else {calculate_max_scroll(&ui_state, rows)};
                             if scroll_offset < max_scroll {
                                 scroll_offset += 1;
                                 ui_state.header_height = draw_header(&mut stdout, ui_state.start_x, ui_state.start_y, &ui_state.current_page)?;
@@ -119,6 +122,16 @@ fn calculate_max_scroll(ui_state: &UIState, terminal_height: u16) -> u16 {
         total_lines += 2; // Space between items
     }
 
+    let available_height = terminal_height - ui_state.header_height - ui_state.footer_height;
+    if total_lines > available_height {
+        total_lines - available_height
+    } else {
+        0
+    }
+}
+
+fn calculate_store_max_scroll(ui_state: &UIState, terminal_height: u16) -> u16 {
+    let total_lines: u16 = get_products_lines(ui_state).len() as u16;
     let available_height = terminal_height - ui_state.header_height - ui_state.footer_height;
     if total_lines > available_height {
         total_lines - available_height
